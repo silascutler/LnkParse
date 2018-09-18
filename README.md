@@ -3,6 +3,9 @@ Windows Shortcut file (LNK) parser
 
 https://msdn.microsoft.com/en-us/library/dd871305.aspx
 
+Install:
+`pip install lnkfile`
+
 
 Example:
 
