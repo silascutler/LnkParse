@@ -12,6 +12,11 @@ import argparse
 
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
 	arg_parser = argparse.ArgumentParser(description=__description__)
 	arg_parser.add_argument('-f', '--file', dest='file', required=True,
 							help='absolute or relative path to the file')

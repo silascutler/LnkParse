@@ -14,6 +14,15 @@ import argparse
 
 class lnk_file(object):
 	def __init__(self, fhandle=None, indata=None, debug=False):
+     """
+     Initialize file
+
+     Args:
+         self: (todo): write your description
+         fhandle: (todo): write your description
+         indata: (todo): write your description
+         debug: (bool): write your description
+     """
 		self.define_static()
 
 		if fhandle:
@@ -86,6 +95,12 @@ class lnk_file(object):
 		self.define_common()
 
 	def define_common(self):
+     """
+     Define common link
+
+     Args:
+         self: (todo): write your description
+     """
 		try:
 			out = ''
 			if self.linkFlag['HasRelativePath']:
@@ -99,6 +114,12 @@ class lnk_file(object):
 				print('Exception define_common: %s' % e)
 
 	def get_command(self):
+     """
+     Get command
+
+     Args:
+         self: (todo): write your description
+     """
 		try:
 			out = ''
 			if self.linkFlag['HasRelativePath']:
@@ -113,6 +134,12 @@ class lnk_file(object):
 			return ''
 
 	def define_static(self):
+     """
+     Define static static
+
+     Args:
+         self: (todo): write your description
+     """
 		# Define static constents used within the LNK format
 
 		# Each MAGIC string refernces a function for processing
@@ -161,9 +188,21 @@ class lnk_file(object):
 
 	@staticmethod
 	def clean_line(rstring):
+     """
+     Removes leading line.
+
+     Args:
+         rstring: (str): write your description
+     """
 		return ''.join(chr(i) for i in rstring if 128 > i > 20)
 
 	def parse_lnk_header(self):
+     """
+     Parse the header
+
+     Args:
+         self: (todo): write your description
+     """
 		# Parse the LNK file header
 		try:
 			# Header always starts with { 4c 00 00 00 } and is the size of the header
@@ -221,6 +260,12 @@ class lnk_file(object):
 			return True
 
 	def parse_link_flags(self):
+     """
+     Parse the link header
+
+     Args:
+         self: (todo): write your description
+     """
 		if self.lnk_header['rlinkFlags'] & 0x00000001:
 			self.linkFlag['HasTargetIDList'] = True
 		if self.lnk_header['rlinkFlags'] & 0x00000002:
@@ -279,6 +324,12 @@ class lnk_file(object):
 		self.lnk_header['linkFlags'] = self.enabled_flags_to_list(self.linkFlag)
 
 	def parse_file_flags(self):
+     """
+     Parse file flags
+
+     Args:
+         self: (todo): write your description
+     """
 		if self.lnk_header['rfileFlags'] & 0x00000001:
 			self.fileFlag['FILE_ATTRIBUTE_READONLY'] = True
 		if self.lnk_header['rfileFlags'] & 0x00000002:
@@ -317,6 +368,12 @@ class lnk_file(object):
 		self.lnk_header['fileFlags'] = self.enabled_flags_to_list(self.fileFlag)
 
 	def parse_link_information(self):
+     """
+     Parse the link information.
+
+     Args:
+         self: (todo): write your description
+     """
 		index = 0
 		while True:
 			tmp_item = {}
@@ -330,6 +387,13 @@ class lnk_file(object):
 
 	# Still in development // repair
 	def parse_targets(self, index):
+     """
+     Parse targets. targets.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+     """
 		max_size = self.targets['size'] + index
 
 		while (index < max_size):
@@ -347,6 +411,12 @@ class lnk_file(object):
 	#           print(self.indata[index + 2: index + 2 + ItemID['size']].replace('\x00',''))
 
 	def process(self):
+     """
+     Process the link
+
+     Args:
+         self: (todo): write your description
+     """
 		index = 0
 		if not self.parse_lnk_header():
 			print('Failed Header Check')
@@ -513,15 +583,39 @@ class lnk_file(object):
 					print('Exception in EXTRABLOCK: %s' % e)
 
 	def parse_environment_block(self, index, size):
+     """
+     Parse environment block.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['ENVIRONMENTAL_VARIABLES_LOCATION_BLOCK'] = {}
 		self.extraBlocks['ENVIRONMENTAL_VARIABLES_LOCATION_BLOCK']['size'] = size
 		self.extraBlocks['ENVIRONMENTAL_VARIABLES_LOCATION_BLOCK'][
 			'variable_location'] = self.clean_line(self.indata[index + 8: index + 8 + size])
 
 	def parse_console_block(self, index, size):
+     """
+     Parse console block
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['CONSOLE_PROPERTIES_BLOCK'] = {}
 
 	def parse_distributedTracker_block(self, index, size):
+     """
+     Parse a block
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK'] = {}
 		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['size'] = \
 			struct.unpack('<I', self.indata[index + 8: index + 12])[0]
@@ -541,30 +635,100 @@ class lnk_file(object):
 			'birth_droid_file_identifier'] = self.indata[index + 80: index + 96].hex()
 
 	def parse_codepage_block(self, index, size):
+     """
+     Parse block at index.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['CONSOLE_CODEPAGE_BLOCK'] = {}
 
 	def parse_specialFolder_block(self, index, size):
+     """
+     Parse special special block
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['SPECIAL_FOLDER_LOCATION_BLOCK'] = {}
 
 	def parse_darwin_block(self, index, size):
+     """
+     Parse block at index.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['DARWIN_BLOCK'] = {}
 
 	def parse_icon_block(self, index, size):
+     """
+     Parse the icon block at index.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['ICON_LOCATION_BLOCK'] = {}
 
 	def parse_shimLayer_block(self, index, size):
+     """
+     Parse shim block
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['SHIM_LAYER_BLOCK'] = {}
 
 	def parse_metadata_block(self, index, size):
+     """
+     Parse the metadata block.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['METADATA_PRPERTIES_BLOCK'] = {}
 
 	def parse_knownFolder_block(self, index, size):
+     """
+     Parse a block block from the index.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['KNOWN_FOLDER_LOCATION_BLOCK'] = {}
 
 	def parse_shellItem_block(self, index, size):
+     """
+     Parse a shell block
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         size: (int): write your description
+     """
 		self.extraBlocks['SHELL_ITEM_IDENTIFIER_BLOCK'] = {}
 
 	def print_lnk_file(self):
+     """
+     Print out the header of the basic
+
+     Args:
+         self: (todo): write your description
+     """
 		print('Windows Shortcut Information:')
 		print('\tLink Flags: %s - (%s)' % (self.format_linkFlags(), self.lnk_header['rlinkFlags']))
 		print('\tFile Flags: %s - (%s)' % (self.format_fileFlags(), self.lnk_header['rfileFlags']))
@@ -595,9 +759,23 @@ class lnk_file(object):
 				print('\t\t\t[%s] %s' % (block, self.extraBlocks[enabled][block]))
 
 	def ms_time_to_unix_time(self, time):
+     """
+     Convert a unix timestamp to a unix timestamp.
+
+     Args:
+         self: (todo): write your description
+         time: (float): write your description
+     """
 		return datetime.datetime.fromtimestamp(time / 10000000.0 - 11644473600).strftime('%Y-%m-%d %H:%M:%S')
 
 	def read_string(self, index):
+     """
+     Reads string from the string.
+
+     Args:
+         self: (todo): write your description
+         index: (todo): write your description
+     """
 		result = ''
 		while self.indata[index] != 0x00:
 			result += chr(self.indata[index])
@@ -605,6 +783,14 @@ class lnk_file(object):
 		return result
 
 	def read_stringData(self, index, u_mult):
+     """
+     Reads a string from the stream.
+
+     Args:
+         self: (todo): write your description
+         index: (int): write your description
+         u_mult: (todo): write your description
+     """
 		string_size = struct.unpack('<H', self.indata[index: index + 2])[0] * u_mult
 		string = self.clean_line(self.indata[index + 2: index + 2 + string_size].replace(b'\x00', b''))
 		new_index = index + string_size + 2
@@ -612,6 +798,12 @@ class lnk_file(object):
 
 	@staticmethod
 	def enabled_flags_to_list(flags):
+     """
+     Convert a list of flags.
+
+     Args:
+         flags: (todo): write your description
+     """
 		enabled = []
 		for flag in flags:
 			if flags[flag]:
@@ -619,14 +811,33 @@ class lnk_file(object):
 		return enabled
 
 	def format_linkFlags(self):
+     """
+     Generate link string that link.
+
+     Args:
+         self: (todo): write your description
+     """
 		enabled = self.enabled_flags_to_list(self.linkFlag)
 		return ' | '.join(enabled)
 
 	def format_fileFlags(self):
+     """
+     Returns a list of the flags for this service.
+
+     Args:
+         self: (todo): write your description
+     """
 		enabled = self.enabled_flags_to_list(self.fileFlag)
 		return ' | '.join(enabled)
 
 	def print_short(self, pjson=False):
+     """
+     Print short short description
+
+     Args:
+         self: (todo): write your description
+         pjson: (str): write your description
+     """
 		out = ''
 		if self.linkFlag['HasRelativePath']:
 			out += self.data['relativePath']
@@ -639,6 +850,13 @@ class lnk_file(object):
 			print(out)
 
 	def print_json(self, print_all=False):
+     """
+     Print out the json
+
+     Args:
+         self: (todo): write your description
+         print_all: (bool): write your description
+     """
 		res = {'header': self.lnk_header, 'data': self.data, 'target': self.targets, 'link_info': self.loc_information, 'extra': self.extraBlocks}
 
 		if 'creation_time' in res['header']:
@@ -671,6 +889,12 @@ class lnk_file(object):
 		print(json.dumps(res, indent=4, separators=(',', ': ')))
 
 def test_case(filename):
+    """
+    Writes case to disk.
+
+    Args:
+        filename: (str): write your description
+    """
 	with open(filename, 'rb') as file:
 		tmp = lnk_file(fhandle=file, debug=True)
 		tmp.print_lnk_file()
@@ -679,6 +903,11 @@ def test_case(filename):
 
 
 def main():
+    """
+    Main entry point.
+
+    Args:
+    """
 	arg_parser = argparse.ArgumentParser(description=__description__)
 	arg_parser.add_argument('-f', '--file', dest='file', required=True,
 							help='absolute or relative path to the file')
