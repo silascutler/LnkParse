@@ -163,6 +163,15 @@ class lnk_file(object):
 	def clean_line(rstring):
 		return ''.join(chr(i) for i in rstring if 128 > i > 20)
 
+	def to_guid(self, data, variant = 2):
+		if len(data) != 16:
+			return data.hex()
+		if variant == 2:
+			data = data[0:4][::-1] + data[4:6][::-1] + data[6:8][::-1] + data[8:]
+		guid = '{' + data[0:4].hex() + '-' + data[4:6].hex() +  '-' + data[6:8].hex() + \
+			 '-' + data[8:10].hex() + '-' + data[10:].hex() + '}'
+		return guid
+
 	def parse_lnk_header(self):
 		# Parse the LNK file header
 		try:
@@ -253,7 +262,7 @@ class lnk_file(object):
 			self.linkFlag['HasExpIcon'] = True
 		if self.lnk_header['rlinkFlags'] & 0x00008000:
 			self.linkFlag['NoPidlAlias'] = True
-		if self.lnk_header['linkFlags'] & 0x00010000:
+		if self.lnk_header['rlinkFlags'] & 0x00010000:
 			self.linkFlag['Reserved1'] = True
 		if self.lnk_header['rlinkFlags'] & 0x00020000:
 			self.linkFlag['RunWithShimLayer'] = True
@@ -531,14 +540,14 @@ class lnk_file(object):
 		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['machine_identifier'] = self.clean_line(
 			self.indata[index + 16: index + 32])
 
-		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['droid_volume_identifier'] = self.indata[
-																						index + 32: index + 48].hex()
-		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['droid_file_identifier'] = self.indata[
-																					  index + 48: index + 64].hex()
-		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK'][
-			'birth_droid_volume_identifier'] = self.indata[index + 64: index + 80].hex()
-		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK'][
-			'birth_droid_file_identifier'] = self.indata[index + 80: index + 96].hex()
+		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['droid_volume_identifier'] = \
+			self.to_guid(self.indata[index + 32: index + 48])
+		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['droid_file_identifier'] = \
+			self.to_guid(self.indata[index + 48: index + 64])
+		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['birth_droid_volume_identifier'] = \
+			self.to_guid(self.indata[index + 64: index + 80])
+		self.extraBlocks['DISTRIBUTED_LINK_TRACKER_BLOCK']['birth_droid_file_identifier'] = \
+			self.to_guid(self.indata[index + 80: index + 96])
 
 	def parse_codepage_block(self, index, size):
 		self.extraBlocks['CONSOLE_CODEPAGE_BLOCK'] = {}
@@ -556,7 +565,27 @@ class lnk_file(object):
 		self.extraBlocks['SHIM_LAYER_BLOCK'] = {}
 
 	def parse_metadata_block(self, index, size):
-		self.extraBlocks['METADATA_PRPERTIES_BLOCK'] = {}
+		self.extraBlocks['METADATA_PROPERTIES_BLOCK'] = {}
+		self.extraBlocks['METADATA_PROPERTIES_BLOCK']['block_size'] = \
+			struct.unpack('<I', self.indata[index: index + 0x04])[0]
+		if self.extraBlocks['METADATA_PROPERTIES_BLOCK']['block_size'] > 0x0c:
+			offset = 0x08
+			count = 1
+			while offset + 0x04 <= size:
+				s = struct.unpack('<I', self.indata[index + offset: index + offset + 0x04])[0]
+				if s == 0x00:
+					break;
+				self.extraBlocks['METADATA_PROPERTIES_BLOCK']['property_storage_size_{}'.format(count)] = s
+				if offset + 0x04 + s <= size and s >= 0x10:
+					self.extraBlocks['METADATA_PROPERTIES_BLOCK'][
+						'property_storage_format_id_{}'.format(count)] = \
+						self.to_guid(self.indata[index + offset + 0x08 : index + offset + 0x18])
+					self.extraBlocks['METADATA_PROPERTIES_BLOCK'][
+						'property_storage_value_{}'.format(count)] = \
+						self.indata[index + offset + 0x18 : index + offset + s].hex()
+				offset += s
+				count += 1
+		
 
 	def parse_knownFolder_block(self, index, size):
 		self.extraBlocks['KNOWN_FOLDER_LOCATION_BLOCK'] = {}
