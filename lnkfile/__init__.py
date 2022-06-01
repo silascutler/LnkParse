@@ -253,7 +253,7 @@ class lnk_file(object):
 			self.linkFlag['HasExpIcon'] = True
 		if self.lnk_header['rlinkFlags'] & 0x00008000:
 			self.linkFlag['NoPidlAlias'] = True
-		if self.lnk_header['linkFlags'] & 0x00010000:
+		if self.lnk_header['rlinkFlags'] & 0x00010000:
 			self.linkFlag['Reserved1'] = True
 		if self.lnk_header['rlinkFlags'] & 0x00020000:
 			self.linkFlag['RunWithShimLayer'] = True
